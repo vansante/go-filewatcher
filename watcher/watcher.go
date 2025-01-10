@@ -15,8 +15,10 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-const deduplicationTime = 500 * time.Millisecond
-const interruptWait = 500 * time.Millisecond
+const (
+	deduplicationTime = 500 * time.Millisecond
+	interruptWait     = 500 * time.Millisecond
+)
 
 type Watcher struct {
 	watcher    *fsnotify.Watcher
