@@ -14,7 +14,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-const deduplicationTime = time.Millisecond * 500
+const deduplicationTime = 500 * time.Millisecond
+const interruptWait = 500 * time.Millisecond
 
 type Watcher struct {
 	watcher    *fsnotify.Watcher
@@ -181,10 +182,18 @@ func (w *Watcher) handleEvents() {
 		w.runChangeCommand()
 	}
 
-	w.runCancel()
+	w.killRunCommand()
 }
 
 func (w *Watcher) runRunCommand() {
+	w.killRunCommand()
+
+	var runCtx context.Context
+	runCtx, w.runCancel = context.WithCancel(w.ctx)
+	w.runExec, _ = RunCommand(runCtx, w.runCmd, false)
+}
+
+func (w *Watcher) killRunCommand() {
 	// Kill existing process first
 	if w.runCancel != nil {
 		w.runCancel()
@@ -192,15 +201,13 @@ func (w *Watcher) runRunCommand() {
 
 	if w.runExec != nil {
 		if w.runExec.Process != nil {
+			_ = w.runExec.Process.Signal(os.Interrupt)
+			time.Sleep(interruptWait)
 			_ = w.runExec.Process.Kill()
 		}
 		_ = w.runExec.Wait()
 	}
 	w.runExec = nil
-
-	var runCtx context.Context
-	runCtx, w.runCancel = context.WithCancel(w.ctx)
-	w.runExec, _ = RunCommand(runCtx, w.runCmd, false)
 }
 
 func (w *Watcher) runChangeCommand() {
