@@ -38,7 +38,7 @@ var Cmd = &cobra.Command{
 	Short: "File change watcher",
 	Long:  "Watch files in a directory and execute command on changes",
 	Example: os.Args[0] + ` --init-cmd="echo Start" --prep-cmd="echo Updated" --run-cmd="echo Running"` +
-		` --extensions=".foo,.baz" ath/to/dir/to/watch1 dir/to/watch2`,
+		` --extensions=".foo,.baz" path/to/dir/to/watch1 dir/to/watch2`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if runCmd == "" {
 			return fmt.Errorf("--run-cmd is required")

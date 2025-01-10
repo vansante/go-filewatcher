@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -201,7 +202,13 @@ func (w *Watcher) killRunCommand() {
 
 	if w.runExec != nil {
 		if w.runExec.Process != nil {
-			_ = w.runExec.Process.Signal(os.Interrupt)
+			// Make sure we kill child processes: https://stackoverflow.com/a/29552044
+			pgid, err := syscall.Getpgid(w.runExec.Process.Pid)
+			if err == nil {
+				_ = syscall.Kill(-pgid, syscall.SIGTERM)
+			}
+			_ = w.runExec.Process.Signal(syscall.SIGTERM)
+
 			time.Sleep(interruptWait)
 			_ = w.runExec.Process.Kill()
 		}
