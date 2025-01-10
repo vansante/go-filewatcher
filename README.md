@@ -2,6 +2,10 @@
 
 A basic filewatcher utility that executes a couple of commands when it notices file changes in given directories.
 
+## How to install
+
+`go install github.com/vansante/go-filewatcher@latest`
+
 ## How to use
 
 `filewatcher --init-cmd="echo Start" --prep-cmd="echo Updated" --run-cmd="echo Running" --extensions=".foo,.baz" /path/to/dir/to/watch1 dir/to/watch2`
