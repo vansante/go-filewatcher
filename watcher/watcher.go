@@ -172,12 +172,28 @@ func (w *Watcher) Watch() {
 }
 
 func (w *Watcher) handleEvents() {
+	w.runRunCommand()
+
 	for path := range w.changes {
 		_, _ = fmt.Fprintf(os.Stderr, "--- Update: %s\n", path)
 		w.runChangeCommand()
 	}
 
 	w.runCancel()
+}
+
+func (w *Watcher) runRunCommand() {
+	if w.runCancel != nil {
+		// Kill existing process
+		w.runCancel()
+	}
+
+	var runCtx context.Context
+	runCtx, w.runCancel = context.WithCancel(w.ctx)
+	err := RunCommand(runCtx, w.runCmd, false)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "--- Error: %v\n", err)
+	}
 }
 
 func (w *Watcher) runChangeCommand() {
@@ -217,17 +233,7 @@ func (w *Watcher) runChangeCommand() {
 		return
 	}
 
-	if w.runCancel != nil {
-		// Kill existing process
-		w.runCancel()
-	}
-
-	var runCtx context.Context
-	runCtx, w.runCancel = context.WithCancel(w.ctx)
-	err := RunCommand(runCtx, w.runCmd, false)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "--- Error: %v\n", err)
-	}
+	w.runRunCommand()
 
 	wg.Wait()
 }
