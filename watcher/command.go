@@ -17,7 +17,18 @@ func RunCommand(ctx context.Context, command string, wait bool) error {
 	cmd.Stderr = os.Stderr
 
 	if !wait {
-		return cmd.Start()
+		err := cmd.Start()
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "--- Error: %v\n", err)
+			return err
+		}
+		return nil
 	}
-	return cmd.Run()
+
+	err := cmd.Run()
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "--- Error: %v\n", err)
+		return err
+	}
+	return nil
 }
