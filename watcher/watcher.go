@@ -207,7 +207,9 @@ func (w *Watcher) runChangeCommand() {
 
 	if w.prepCmd != "" {
 		err := RunCommand(commandCtx, w.prepCmd, true)
-		_, _ = fmt.Fprintf(os.Stderr, "--- Error: %v\n", err)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "--- Error: %v\n", err)
+		}
 		return
 	}
 
