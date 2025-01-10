@@ -21,6 +21,7 @@ type Watcher struct {
 	extensions []string
 	prepCmd    string
 	runCmd     string
+	runCancel  context.CancelFunc
 	changes    chan string
 	ctx        context.Context
 }
@@ -175,6 +176,8 @@ func (w *Watcher) handleEvents() {
 		_, _ = fmt.Fprintf(os.Stderr, "--- Update: %s\n", path)
 		w.runChangeCommand()
 	}
+
+	w.runCancel()
 }
 
 func (w *Watcher) runChangeCommand() {
@@ -210,6 +213,14 @@ func (w *Watcher) runChangeCommand() {
 		return
 	}
 
-	RunCommand(w.ctx, w.runCmd, false)
+	if w.runCancel != nil {
+		// Kill existing process
+		w.runCancel()
+	}
+
+	var runCtx context.Context
+	runCtx, w.runCancel = context.WithCancel(w.ctx)
+	RunCommand(runCtx, w.runCmd, false)
+
 	wg.Wait()
 }
