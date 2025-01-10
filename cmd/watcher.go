@@ -71,10 +71,16 @@ var Cmd = &cobra.Command{
 		}
 
 		if initCmd != "" {
-			watcher.RunCommand(cmd.Context(), initCmd, true)
+			err := watcher.RunCommand(cmd.Context(), initCmd, true)
+			if err != nil {
+				return fmt.Errorf("error running init command '%s': %w", initCmd, err)
+			}
 		}
 		if prepCmd != "" {
-			watcher.RunCommand(cmd.Context(), prepCmd, true)
+			err := watcher.RunCommand(cmd.Context(), prepCmd, true)
+			if err != nil {
+				return fmt.Errorf("error running prep command '%s': %w", prepCmd, err)
+			}
 		}
 
 		go w.Watch()

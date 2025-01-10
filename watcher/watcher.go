@@ -206,7 +206,9 @@ func (w *Watcher) runChangeCommand() {
 	}()
 
 	if w.prepCmd != "" {
-		RunCommand(commandCtx, w.prepCmd, true)
+		err := RunCommand(commandCtx, w.prepCmd, true)
+		_, _ = fmt.Fprintf(os.Stderr, "--- Error: %v\n", err)
+		return
 	}
 
 	if commandCtx.Err() != nil {
@@ -220,7 +222,10 @@ func (w *Watcher) runChangeCommand() {
 
 	var runCtx context.Context
 	runCtx, w.runCancel = context.WithCancel(w.ctx)
-	RunCommand(runCtx, w.runCmd, false)
+	err := RunCommand(runCtx, w.runCmd, false)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "--- Error: %v\n", err)
+	}
 
 	wg.Wait()
 }

@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-func RunCommand(ctx context.Context, command string, wait bool) {
+func RunCommand(ctx context.Context, command string, wait bool) error {
 	_, _ = fmt.Fprintf(os.Stderr, "--- Running: %s\n", command)
 
 	// Run the command using `sh -c <command>` to allow for
@@ -17,8 +17,7 @@ func RunCommand(ctx context.Context, command string, wait bool) {
 	cmd.Stderr = os.Stderr
 
 	if !wait {
-		_ = cmd.Start()
-		return
+		return cmd.Start()
 	}
-	_ = cmd.Run()
+	return cmd.Run()
 }
