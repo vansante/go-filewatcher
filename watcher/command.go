@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-func RunCommand(ctx context.Context, command string, wait bool) error {
+func RunCommand(ctx context.Context, command string, wait bool) (*exec.Cmd, error) {
 	_, _ = fmt.Fprintf(os.Stderr, "--- Running: %s\n", command)
 
 	// Run the command using `sh -c <command>` to allow for
@@ -20,15 +20,15 @@ func RunCommand(ctx context.Context, command string, wait bool) error {
 		err := cmd.Start()
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "--- Error: %v\n", err)
-			return err
+			return nil, err
 		}
-		return nil
+		return cmd, nil
 	}
 
 	err := cmd.Run()
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "--- Error: %v\n", err)
-		return err
+		return nil, err
 	}
-	return nil
+	return cmd, nil
 }

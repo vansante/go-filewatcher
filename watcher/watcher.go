@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -22,6 +23,7 @@ type Watcher struct {
 	prepCmd    string
 	runCmd     string
 	runCancel  context.CancelFunc
+	runExec    *exec.Cmd
 	changes    chan string
 	ctx        context.Context
 }
@@ -183,14 +185,22 @@ func (w *Watcher) handleEvents() {
 }
 
 func (w *Watcher) runRunCommand() {
+	// Kill existing process first
 	if w.runCancel != nil {
-		// Kill existing process
 		w.runCancel()
 	}
 
+	if w.runExec != nil {
+		if w.runExec.Process != nil {
+			_ = w.runExec.Process.Kill()
+		}
+		_ = w.runExec.Wait()
+	}
+	w.runExec = nil
+
 	var runCtx context.Context
 	runCtx, w.runCancel = context.WithCancel(w.ctx)
-	_ = RunCommand(runCtx, w.runCmd, false)
+	w.runExec, _ = RunCommand(runCtx, w.runCmd, false)
 }
 
 func (w *Watcher) runChangeCommand() {
@@ -219,7 +229,7 @@ func (w *Watcher) runChangeCommand() {
 	}()
 
 	if w.prepCmd != "" {
-		err := RunCommand(commandCtx, w.prepCmd, true)
+		_, err := RunCommand(commandCtx, w.prepCmd, true)
 		if err != nil {
 			return
 		}
