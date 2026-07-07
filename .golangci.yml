@@ -1,55 +1,78 @@
+version: "2"
 run:
-  # exit code when at least one issue was found, default is 1
   issues-exit-code: 1
-
-  # include test files or not, default is true
-  tests: false
-
-# all available settings of specific linters
-linters-settings:
-  funlen:
-    lines: 120
-    statements: 65
-  gocyclo:
-    min-complexity: 40
-  dupl:
-    threshold: 100
-  goconst:
-    min-len: 3
-    min-occurrences: 3
-  depguard:
-  lll:
-    line-length: 150
-  nakedret:
-    max-func-lines: 0
-
+  tests: true
 linters:
   enable:
+    - asasalint
     - asciicheck
-    - copyloopvar
+    - bidichk
+    - bodyclose
+    - contextcheck
     - dogsled
+    - durationcheck
+    - errchkjson
+    - errorlint
     - funlen
+    - gocheckcompilerdirectives
+    - gochecksumtype
     - goconst
-    - gocritic
     - gocyclo
-    - gofumpt
-    - goimports
-    - gosimple
+    - gosmopolitan
     - govet
     - lll
+    - loggercheck
+    - makezero
     - misspell
+    - musttag
     - nakedret
-    - prealloc
+    - nilerr
+    - nilnesserr
+    - noctx
+    - protogetter
+    - reassign
+    - recvcheck
     - revive
+    - rowserrcheck
+    - spancheck
     - staticcheck
+    - sqlclosecheck
+    - testifylint
     - unconvert
     - unparam
     - unused
+    - zerologlint
   disable:
-    - gosec
-    - nilerr
-  presets:
-    - bugs
-    - unused
-  fast: false
-
+    - exhaustive
+  settings:
+    dupl:
+      threshold: 100
+    goconst:
+      min-len: 3
+      min-occurrences: 2
+    gocyclo:
+      min-complexity: 20
+    lll:
+      line-length: 160
+    nakedret:
+      max-func-lines: 10
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofumpt
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
